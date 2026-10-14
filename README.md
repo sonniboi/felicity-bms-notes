@@ -54,4 +54,4 @@ Corrections and measurements from other models are very welcome — open an issu
 
 ## License
 
-Text: CC BY 4.0. Code in `examples/`: MIT. See [`LICENSE.md`](LICENSE.md).
+Text: CC BY 4.0. Code in `examples/`: MIT. Code: [`LICENSE`](LICENSE) (MIT) · text: [`LICENSE-docs.md`](LICENSE-docs.md) (CC BY 4.0).
