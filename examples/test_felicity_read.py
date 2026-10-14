@@ -44,5 +44,45 @@ class Tests(unittest.TestCase):
         self.assertEqual(i["mcu1_version"], 524)
 
 
+class WatchTests(unittest.TestCase):
+    def test_tracker_reports_only_changes(self):
+        import felicity_watch as w
+        t = w.FaultTracker()
+        self.assertEqual(t.update(0, 0), [])
+        ev = t.update(13, 0x1001)
+        self.assertEqual(len(ev), 1)
+        self.assertIn("C13 Parallel failed", ev[0])
+        self.assertEqual(t.update(13, 0x1001), [])
+        self.assertEqual(len(t.update(0, 0)), 1)  # back to none is reported too
+
+    def test_freeze_detector(self):
+        import felicity_watch as w
+        d = w.FreezeDetector(seconds=100)
+        self.assertIsNone(d.update((53.0, -1.0, 80), 0))
+        self.assertIsNone(d.update((53.0, -1.0, 80), 99))
+        self.assertIn("unchanged", d.update((53.0, -1.0, 80), 100))
+        self.assertIsNone(d.update((53.0, -1.0, 80), 200))      # reported once
+        self.assertIsNone(d.update((53.01, -1.0, 80), 201))     # change resets
+
+    def test_scan_collects_only_answering_addresses(self):
+        import felicity_scan as s
+
+        class FakePort:
+            def __init__(self):
+                self.addr = None
+            def reset_input_buffer(self): pass
+            def write(self, data): self.addr = data[0]
+            def read(self, n):
+                if self.addr in (1, 3):
+                    regs = [112, 7500 if self.addr == 1 else 2409, 3, 0, 1, 2, 3, 4, 5, 18, 0xFFFF, 524, 8, 0, 0, 0]
+                    return fake_response(self.addr, regs)
+                return b""
+
+        found = s.scan(FakePort(), 1, 5, wait=0)
+        self.assertEqual(sorted(found), [1, 3])
+        self.assertEqual(found[1]["model"], "FLA48460TG2-EU")
+        self.assertEqual(found[3]["model"], "LPBF48200-P")
+
+
 if __name__ == "__main__":
     unittest.main()
