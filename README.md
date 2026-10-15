@@ -16,6 +16,7 @@ Everything here comes from a real three-pack installation (2× LPBF48200-P + 1×
 | [`docs/eeprom-parameters.md`](docs/eeprom-parameters.md) | Names of all EEPROM registers `0x2040–0x207F` and `0x2320–0x237F` as named by the vendor's own tool |
 | [`docs/errata.md`](docs/errata.md) | Where the public vendor PDF (`BMS Communication Protocol RS485 20210608`) and the vendor tool are wrong |
 | [`docs/troubleshooting.md`](docs/troubleshooting.md) | Checklist: frozen values, C13, missed faults, dynamic limits, bus hygiene |
+| [`docs/venus-os-integration.md`](docs/venus-os-integration.md) | Concept: feeding the packs into Victron Venus OS (bank service, SOC aggregation, DVCC, the traps) — no code |
 | [`docs/methodology.md`](docs/methodology.md) | How the findings were obtained, and their limits |
 | [`examples/felicity_read.py`](examples/felicity_read.py) | Minimal **read-only** Modbus RTU reader (stdlib + `pyserial`) |
 | [`examples/felicity_scan.py`](examples/felicity_scan.py) | Finds the packs on the bus (address, model, serial, firmware) — run after DIP changes |
