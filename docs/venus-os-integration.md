@@ -1,6 +1,8 @@
 # Integrating the packs into Victron Venus OS (concept)
 
-This page describes **how** we feed three Felicity packs into a Victron GX / Venus OS system and which traps we hit. It is a design note, **not** a ready-to-install package: no code is published here, and the details depend on your Venus version and your system. Evidence labels: see the [README](../README.md#evidence-labels).
+This page describes **how** we feed three Felicity packs into a Victron GX / Venus OS system and which traps we hit. It is a design note; the details depend on your Venus version and your system. Evidence labels: see the [README](../README.md#evidence-labels).
+
+> **Code:** the per-pack and bank D-Bus services from section 2 are published as [venus-felicity-bridge](https://github.com/sonniboi/venus-felicity-bridge) (MIT, with tests). The RS485 polling process, the dashboard and the DVCC current-limit bridge are not published.
 
 Setup this is based on: Raspberry Pi running Venus OS Large (3.8x), three packs on one RS485 bus (2× LPBF48200-P, 1× FLA48460TG2-EU), Victron MPPT chargers, DVCC on. No CAN link between the packs and the GX; the packs talk Modbus RS485 only.
 
