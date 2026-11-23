@@ -23,9 +23,14 @@ Evidence labels: see the [README](../README.md#evidence-labels).
 | `0x130C` | SOH | % (100 = 100 %, **not** "rated capacity") |
 | `0x130D` | cycle count | also in `0x2085` |
 | `0x131C–0x131F` | limits | charge V, discharge V (× 0.01 V), charge A, discharge A (× 0.1 A) |
-| `0x1320–0x1327` | cell statistics | max/min voltage, delta, max/min temperature + sensor IDs |
+| `0x1320` / `0x1321` | highest cell voltage / its index | mV / 0-based (cell *n*+1) **[measured]** |
+| `0x1322` / `0x1323` | lowest cell voltage / its index | mV / 0-based (cell *n*+1). `0x1323` is **not** a voltage delta **[measured]** |
+| `0x1324` / `0x1325` | highest cell temperature / sensor index | 1 °C / 0-based **[measured]** |
+| `0x1326` / `0x1327` | lowest cell temperature / sensor index | 1 °C / 0-based **[measured]** |
 
 A single read of `0x1302` with count 10 covers `0x1302…0x130B`.
+
+There is no known register for the cell voltage delta: calculate highest minus lowest of the 16 cells (`0x132A…`). Earlier versions of this page listed a delta in `0x1320–0x1327`; reading `0x1323` as mV gives e.g. "8 mV" while cell 9 is the lowest and the real spread is 22 mV. `0x130A` had the same value as the MOS temperature `0x0238` in 9 of 9 snapshots, so it may not be an ambient sensor. **[measured]**
 
 ⚠ **FLA reports dynamic current limits** in `0x131C–0x131F` (e.g. charge limit 250 A → 10 A → 10 A, discharge 250 A → 41 A → 250 A within hours); the LPBF reports a static 80/80 A. A fixed expectation on the FLA produces false alarms. **[measured]**
 
@@ -68,12 +73,12 @@ Cross-pack values: system limits (the sum of the packs: 250 + 80 + 80 = 410 A), 
 
 - **`0x130E–0x131B`** (ChgAh, ChgWh, ChgTime, DcgAh, DcgWh, DcgTime, RunTime) are **not implemented on LPBF48200-P** (garbage; the PDF says so too). On the **FLA they are implemented**, as **word-swapped uint32** (low word first: `regs[i] | regs[i+1] << 16`); `RunTime` counts up live. **[measured]** *Units/scaling are not calibrated.*
 - **`0x4406–0x440B`** shown as "energy throughput" are **not energy**: converted to kWh the high words run 63/64/65 with the pack number, and charged and discharged differ by only 0.0014 kWh. Treat them as two unrelated 16-bit values. **[measured]** Use the cycle count (`0x130D`) and your own shunt/meter for energy.
-- `0x440E–0x440F`: run time as uint32, ÷ 3600 = hours; survives power cycles. **[measured]**
+- `0x440E–0x440F`: **not a run time** (correction, 2026-11-23; earlier versions of this page said "run time in hours"). Read as uint32 ÷ 3600 it was the same on all three packs including a newer one, and went 1493 → 1438 → 1493 within three weeks. Meaning unknown. **[measured]**
 
 ## Unusable / unclear
 
 - ⛔ **`0x4300–0x431F` "fault event log" and `0x0000–0x00FF` "ring buffer"**: mirrored or stale data (e.g. `0x0000–0x0007` returns the limit block twice; the same register reads `0 0 0 0` once and a plausible limit block the next time). Typical for unmapped addresses. **Do not use as history.** **[measured]**
-- `0x440C`: not C14; fixed `0xFF`/`0x00`. `0x4400` = 124 on all packs, unknown. `0x2081` (firmware build) is not reliably readable while other readers are active. `0x2086–0x208F` are uint32 counter pairs with unknown scaling.
+- `0x440C`: not C14; fixed `0xFF`/`0x00`. `0x4400` = 124 on all packs, unknown. `0x2081` is not a firmware build number: one pack read 1201, 344 and 658 within three weeks (2026-11). **[measured]** Meaning unknown. `0x2086–0x208F` are uint32 counter pairs with unknown scaling.
 
 ## Voltage offset on the FLA
 
